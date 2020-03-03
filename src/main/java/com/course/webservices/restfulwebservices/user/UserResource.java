@@ -48,4 +48,17 @@ public class UserResource {
         User user = userDaoService.deleteUser(id);
         return ResponseEntity.ok(user);
     }
+
+    @GetMapping("/api/users")
+    public ResponseEntity retrieveUserParam(@RequestParam(name = "id", required = false) Integer id) {
+        if (id == null) {
+            return ResponseEntity.ok(userDaoService.findAll());
+        }
+        User one = userDaoService.findOne(id);
+        if (one == null) {
+            throw new UserNotFoundException("id: " + id);
+        }
+
+        return ResponseEntity.ok(one);
+    }
 }

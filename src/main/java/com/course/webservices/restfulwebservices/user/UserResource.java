@@ -1,8 +1,7 @@
 package com.course.webservices.restfulwebservices.user;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.core.ControllerEntityLinks;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,18 +11,22 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
 @RestController
+@RequestMapping("users")
 public class UserResource {
 
     @Autowired
     private UserDaoService userDaoService;
 
-    @GetMapping("/users")
+    @GetMapping
     public List<User> retrieveAllUsers() {
         return userDaoService.findAll();
     }
 
-    @GetMapping("/users/{id}")
+    @GetMapping("{id}")
     public Resource<User> retrieveUser(@PathVariable int id) {
         User one = userDaoService.findOne(id);
         if (one == null) {
@@ -36,24 +39,21 @@ public class UserResource {
         return resource;
     }
 
-    @PostMapping("/users")
+    @PostMapping
     public ResponseEntity createUser(@Valid @RequestBody User user) {
         User save = userDaoService.save(user);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(save.getId()).toUri();
         return ResponseEntity.created(uri).build();
     }
 
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("{id}")
     public ResponseEntity deleteUser(@PathVariable int id) {
         User user = userDaoService.deleteUser(id);
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/api/users")
-    public ResponseEntity retrieveUserParam(@RequestParam(name = "id", required = false) Integer id) {
-        if (id == null) {
-            return ResponseEntity.ok(userDaoService.findAll());
-        }
+    @GetMapping(params = "id")
+    public ResponseEntity retrieveUserParam(@RequestParam(name = "id") Integer id) {
         User one = userDaoService.findOne(id);
         if (one == null) {
             throw new UserNotFoundException("id: " + id);
